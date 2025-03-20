@@ -1,0 +1,25 @@
+library(tidyverse)
+library(feasts)
+library(tsibble)
+
+raw_data <- read_csv(file = "data/retail_store_inventory.csv")
+
+raw_data %>% 
+  janitor::clean_names() -> raw_data
+
+
+raw_data %>% 
+  filter(product_id == "P0001") %>% 
+  group_by(date) %>% 
+  summarise(
+    units_sold = sum(units_sold)
+  ) %>% 
+  ungroup() -> p0001_units_sold
+
+p0001_units_sold %>% 
+  as_tsibble(index = date) -> p0001_units_sold
+
+
+p0001_units_sold %>% 
+  filter(date >= "2023-10-01") %>% 
+  autoplot()

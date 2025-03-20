@@ -1,0 +1,24 @@
+raw_data %>% 
+  group_by(date) %>% 
+  summarise(total_sold = sum(units_sold)) %>% 
+  ungroup() %>% 
+  e_chart(date) %>% 
+  e_line(total_sold) 
+
+raw_data %>% 
+  filter(date >= "2022-12-01") %>% 
+  group_by(category) %>% 
+  summarise(total_sold = sum(units_sold)) %>% 
+  ungroup() %>% 
+  arrange(total_sold) %>% 
+  e_charts(category) %>% 
+  e_bar(total_sold) %>% 
+  e_flip_coords()
+
+raw_data %>% 
+  group_by(date, store_id) %>% 
+  summarise(total_sold = sum(units_sold)) %>% 
+  ungroup() %>% 
+  group_by(store_id) %>% 
+  e_chart(date) %>% 
+  e_line(total_sold) 
