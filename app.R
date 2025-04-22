@@ -2,6 +2,12 @@ library(shiny)
 library(tidyverse)
 library(bslib)
 library(echarts4r)
+library(fable)
+library(tsibble)
+library(feasts)
+library(lubridate)
+
+source("utils_script.R")
 
 raw_data <- read_csv(file = "data/retail_store_inventory.csv")
 
@@ -70,7 +76,7 @@ server <- function(input, output, session) {
   output$dashboard_totalsoldall <- renderUI({
     card(
       card_title("Total Product Sold"),
-      card_body_fill(
+      card_body(
         echarts4rOutput(outputId = "dashboard_totalSoldAllLineChart")
       )
     )
@@ -79,7 +85,7 @@ server <- function(input, output, session) {
   output$dashboard_totalsoldpercategory <- renderUI({
     card(
       card_title("Total Product Sold per Category"),
-      card_body_fill(
+      card_body(
         echarts4rOutput(outputId = "dashboard_totalSoldPerCategoryBarChart")
       )
     )
@@ -88,7 +94,7 @@ server <- function(input, output, session) {
   output$dashboard_totalsoldperregion <- renderUI({
     card(
       card_title("Total Product Sold per Region"),
-      card_body_fill(
+      card_body(
         echarts4rOutput(outputId = "dashboard_totalSoldPerRegionBarChart")
       )
     )
@@ -97,7 +103,7 @@ server <- function(input, output, session) {
   output$dashboard_totalsoldperstore <- renderUI({
     card(
       card_title("Total Product Sold per Store"),
-      card_body_fill(
+      card_body(
         echarts4rOutput(outputId = "dashboard_totalSoldPerStoreLineChart")
       )
     )
@@ -105,12 +111,14 @@ server <- function(input, output, session) {
   
   output$dashboard_totalSoldAllLineChart <- renderEcharts4r({
     dashboard_state$sales_data_used %>% 
-      group_by(date) %>% 
-      summarise(total_sold = sum(units_sold)) %>% 
-      ungroup() %>% 
-      e_chart(date) %>% 
-      e_line(total_sold) %>% 
-      e_tooltip(trigger = "axis")
+      group_by(date) %>%
+      summarise(total_sales = sum(units_sold)) %>%
+      ungroup() %>%
+      do_forecast() %>% 
+      group_by(type) %>% 
+      e_charts(date) %>% 
+      e_line(total_sales) %>% 
+      e_tooltip("axis")
   })
   
   output$dashboard_totalSoldPerCategoryBarChart <- renderEcharts4r({
